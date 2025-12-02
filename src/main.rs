@@ -1,3 +1,6 @@
+mod safeopening;
+
 fn main() {
-    println!("Hello, world!");
+    // Day 1
+    crate::safeopening::main();
 }
