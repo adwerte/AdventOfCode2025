@@ -35,39 +35,39 @@ fn get_2_battery_joltage(bank : &str)-> usize{
 }
 
 fn get_battery_joltage_concated(bank :&str, n : usize)-> usize{
-    let vec = get_battery_joltage(bank, n).unwrap();
+    let vec = get_battery_joltage(bank, n);
     vec.iter().fold(0, |acc, elem| acc * 10 + *elem as usize)
 }
 
 
-fn get_battery_joltage(bank : &str, n : usize) -> Result<Vec<u8>, ()> {
+fn get_battery_joltage(bank : &str, n : usize) -> Vec<u8> {
     let mut digits = vec![0; n];
-    digits[0] = bank.chars().next().unwrap().to_digit(10).unwrap() as u8;
-    for index in 1..bank.len(){
-        let digit = bank.chars().nth(index).unwrap().to_digit(10).unwrap() as u8;
-        let new_index = update_last_smallest_digit(&digits, digit, index);
-        if new_index == index {
-            if index >= digits.len() {
-                continue;
-            } else {
-                digits[index] = digit;
-            }
-        } else {
-            let new_result = get_battery_joltage(&bank[new_index..], n - index);
-            match new_result {
-                Ok(test) => digits[new_index..].copy_from_slice(&test),
-                Err(temp) => continue,
+    let mut iterator = bank.chars();
+    let mut current_digit = 1;
+    digits[0] = iterator.next().unwrap().to_digit(10).unwrap() as u8;
+
+
+    for (index, char) in iterator.enumerate(){
+        let digit = char.to_digit(10).unwrap() as u8;
+        let value = 't: { for old_index in (1..digits.len() +1).rev(){
+            println!("found {} {}, {}, {}", digits[old_index -1], digit, bank.len() - index, digits.len() - old_index);
+            if digits[old_index - 1] < digit && bank.len() - index >= digits.len() - old_index{
+                digits[old_index - 1] = digit;
+                break 't Some(old_index - 1);
             }
         }
-        //digits[new_index..] = get_battery_joltage(&bank[new_index..], n - new_index)
+        
+        digits.iter().position(|x|* x == 0u8)
+        
+        };
+        println!("{:?}", digits);
+        if let Some(index) = value{
+            digits[index] = digit
+        }
+        
     }
-
-    if digits.last().unwrap() == &0u8{
-        Err(())
-    } else {
-        Ok(digits)
-    }
-    
+    println!("{:?}", digits);
+    digits
 }
 
 fn update_last_smallest_digit(digits : &Vec<u8>, updator : u8, index : usize) -> usize {
@@ -97,13 +97,13 @@ mod test {
     
     #[test]
     fn test_2_from_811111111111119(){
-        let number = get_2_battery_joltage("811111111111119");
-        assert_eq!(number, 89)
+        let number = get_battery_joltage_concated("811111111111119", 2);
+        assert_eq!(number, 89);
     }
 
     #[test]
     fn test_2_from_234234234234278(){
-        let number = get_2_battery_joltage("234234234234278");
+        let number = get_battery_joltage_concated("234234234234278", 2);
         assert_eq!(number, 78)
     }
 
@@ -111,5 +111,13 @@ mod test {
     fn test_2_from_818181911112111(){
         let number = get_2_battery_joltage("818181911112111");
         assert_eq!(number, 92)
+    }
+
+    #[test]
+    fn test_fuck(){
+        for i in (0..2).rev() {
+            println!("{}", i)
+        }
+        assert!(false)
     }
 }
