@@ -34,15 +34,55 @@ fn get_2_battery_joltage(bank : &str)-> usize{
     largest_number
 }
 
-fn get_12_battery_joltage(bank : &str) -> usize {
-    let mut digits: [usize; 12] = [0; 12];
-    digits[0] = bank.chars().nth(0).unwrap().to_digit(10).unwrap() as usize;
-
-    todo!()
-
-
+fn get_battery_joltage_concated(bank :&str, n : usize)-> usize{
+    let vec = get_battery_joltage(bank, n).unwrap();
+    vec.iter().fold(0, |acc, elem| acc * 10 + *elem as usize)
 }
 
+
+fn get_battery_joltage(bank : &str, n : usize) -> Result<Vec<u8>, ()> {
+    let mut digits = vec![0; n];
+    digits[0] = bank.chars().next().unwrap().to_digit(10).unwrap() as u8;
+    for index in 1..bank.len(){
+        let digit = bank.chars().nth(index).unwrap().to_digit(10).unwrap() as u8;
+        let new_index = update_last_smallest_digit(&digits, digit, index);
+        if new_index == index {
+            if index >= digits.len() {
+                continue;
+            } else {
+                digits[index] = digit;
+            }
+        } else {
+            let new_result = get_battery_joltage(&bank[new_index..], n - index);
+            match new_result {
+                Ok(test) => digits[new_index..].copy_from_slice(&test),
+                Err(temp) => continue,
+            }
+        }
+        //digits[new_index..] = get_battery_joltage(&bank[new_index..], n - new_index)
+    }
+
+    if digits.last().unwrap() == &0u8{
+        Err(())
+    } else {
+        Ok(digits)
+    }
+    
+}
+
+fn update_last_smallest_digit(digits : &Vec<u8>, updator : u8, index : usize) -> usize {
+    let new_option = index.checked_sub(1);
+    if let Some(new_index) = new_option && digits[new_index] > updator && index <= digits.len(){
+        return index;
+    }
+
+    let value = if let Some(new_index) = new_option{
+        update_last_smallest_digit(digits, updator, new_index)
+    } else {
+        index
+    };
+    value
+}
 
 
 #[cfg(test)]
@@ -51,7 +91,7 @@ mod test {
 
     #[test]
     fn test_2_from_987654321111111(){
-        let number = get_2_battery_joltage("987654321111111");
+        let number = get_battery_joltage_concated("987654321111111", 2);
         assert_eq!(number, 98)
     }
     
