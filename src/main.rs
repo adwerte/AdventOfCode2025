@@ -1,6 +1,6 @@
-mod invalid_ids;
 mod safeopening;
 mod battery_joltage;
+mod paper_rolls;
 fn main() {
     // Day 1
     crate::safeopening::main();
