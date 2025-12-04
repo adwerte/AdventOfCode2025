@@ -1,37 +1,24 @@
-use std::fs;
+use std::{collections::VecDeque, fmt::Pointer, fs};
 
 
 pub fn main() {
     let input = fs::read_to_string("./input/3_joltage.txt").unwrap();
-    let output = interpet_input(&input);
+    let output = interpet_input(&input, 2);
     let sum : usize = output.iter().sum();
-    println!("Day 3: joltage sum = {}", sum)
+    println!("Day 3: 2 joltage sum = {}", sum);
+    let output = interpet_input(&input, 12);
+    let sum : usize = output.iter().sum();
+    println!("Day 3: 12 joltage sum = {}", sum)
 }
 
-fn interpet_input(input: &str) -> Vec<usize> {
+fn interpet_input(input: &str, n : usize) -> Vec<usize> {
     let mut output = Vec::new();
     let banks = input.split("\n");
     for bank in banks {
-        let joltage = get_2_battery_joltage(bank);
+        let joltage = get_battery_joltage_concated(bank, n);
         output.push(joltage);
     }
     output
-}
-fn get_2_battery_joltage(bank : &str)-> usize{
-    let mut largest_number: usize = 0;
-    for first_index in 0..bank.len(){
-        for second_index in first_index + 1..bank.len(){
-            let digits : String = [
-                bank.chars().nth(first_index).unwrap(),
-                bank.chars().nth(second_index).unwrap(),
-            ].iter().collect();
-            let number:usize = digits.parse().unwrap();
-            largest_number = largest_number.max(number)
-        }
-    }
-
-
-    largest_number
 }
 
 fn get_battery_joltage_concated(bank :&str, n : usize)-> usize{
@@ -42,48 +29,28 @@ fn get_battery_joltage_concated(bank :&str, n : usize)-> usize{
 
 fn get_battery_joltage(bank : &str, n : usize) -> Vec<u8> {
     let mut digits = vec![0; n];
-    let mut iterator = bank.chars();
-    let mut current_digit = 1;
-    digits[0] = iterator.next().unwrap().to_digit(10).unwrap() as u8;
+    let iterator = bank.chars();
 
-
-    for (index, char) in iterator.enumerate(){
+    for (bank_index, char) in iterator.enumerate(){
         let digit = char.to_digit(10).unwrap() as u8;
-        let value = 't: { for old_index in (1..digits.len() +1).rev(){
-            println!("found {} {}, {}, {}", digits[old_index -1], digit, bank.len() - index, digits.len() - old_index);
-            if digits[old_index - 1] < digit && bank.len() - index >= digits.len() - old_index{
-                digits[old_index - 1] = digit;
-                break 't Some(old_index - 1);
+        let remained = bank.len() - bank_index;
+        let mut positions = Vec::new();
+        for (digit_index, old_digit) in digits.iter().enumerate(){
+            let required = n - digit_index;
+            if required <= remained && *old_digit < digit{
+                positions.push(digit_index);
             }
         }
-        
-        digits.iter().position(|x|* x == 0u8)
-        
-        };
-        println!("{:?}", digits);
-        if let Some(index) = value{
-            digits[index] = digit
+        if let Some(index) = positions.iter().min(){
+            digits[*index] = digit;
+            for temp in digits.iter_mut().skip(index + 1){
+                *temp = 0;
+            }
         }
-        
     }
-    println!("{:?}", digits);
+
     digits
 }
-
-fn update_last_smallest_digit(digits : &Vec<u8>, updator : u8, index : usize) -> usize {
-    let new_option = index.checked_sub(1);
-    if let Some(new_index) = new_option && digits[new_index] > updator && index <= digits.len(){
-        return index;
-    }
-
-    let value = if let Some(new_index) = new_option{
-        update_last_smallest_digit(digits, updator, new_index)
-    } else {
-        index
-    };
-    value
-}
-
 
 #[cfg(test)]
 mod test {
@@ -109,15 +76,32 @@ mod test {
 
     #[test]
     fn test_2_from_818181911112111(){
-        let number = get_2_battery_joltage("818181911112111");
+        let number = get_battery_joltage_concated("818181911112111", 2);
         assert_eq!(number, 92)
     }
 
     #[test]
-    fn test_fuck(){
-        for i in (0..2).rev() {
-            println!("{}", i)
-        }
-        assert!(false)
+    fn test_12_from_987654321111111(){
+        let number = get_battery_joltage_concated("987654321111111", 12);
+        assert_eq!(number, 987654321111)
     }
+    
+    #[test]
+    fn test_12_from_811111111111119(){
+        let number = get_battery_joltage_concated("811111111111119", 12);
+        assert_eq!(number, 811111111119);
+    }
+
+    #[test]
+    fn test_12_from_234234234234278(){
+        let number = get_battery_joltage_concated("234234234234278", 12);
+        assert_eq!(number, 434234234278)
+    }
+
+    #[test]
+    fn test_12_from_818181911112111(){
+        let number = get_battery_joltage_concated("818181911112111", 12);
+        assert_eq!(number, 888911112111)
+    }
+
 }
