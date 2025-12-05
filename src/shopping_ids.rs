@@ -2,15 +2,15 @@ use std::fs;
 
 use itertools::Itertools;
 
-pub fn main(){
+pub fn main() {
     let bank = fs::read_to_string("./input/5_shopping_ids.txt").unwrap();
 
     let (range, bank) = interpet_input(&bank);
 
-    let mut fresh:usize = 0;
-    for astring in bank.split('\n'){
-        let number:usize = astring.parse().unwrap();
-        if range.value_in(number){
+    let mut fresh: usize = 0;
+    for astring in bank.split('\n') {
+        let number: usize = astring.parse().unwrap();
+        if range.value_in(number) {
             fresh += 1;
         }
     }
@@ -20,10 +20,11 @@ pub fn main(){
     let sum = range.get_full_range_sum();
 
     println!("Day 5: Fresh produce ids {}", sum);
-
+    // guess 1: 353084569925896
+    // guess 2: 352716206375547
 }
 
-fn interpet_input(bank : &str)-> (Ranger, &str) {
+fn interpet_input(bank: &str) -> (Ranger, &str) {
     let bank = bank.trim();
     let mut split = bank.split("\n\n");
 
@@ -33,7 +34,6 @@ fn interpet_input(bank : &str)-> (Ranger, &str) {
 
     (ranges, ids)
 }
-
 
 #[derive(Debug)]
 struct Ranger {
@@ -49,7 +49,10 @@ impl Ranger {
             let end: usize = split.next().unwrap().parse().unwrap();
             ranges.push([start, end])
         }
-        let ranges = ranges.into_iter().sorted_by(|x, y| x[0].cmp(&y[0])).collect();
+        let ranges = ranges
+            .into_iter()
+            .sorted_by(|x, y| x[0].cmp(&y[0]))
+            .collect();
 
         Self { ranges }
     }
@@ -65,19 +68,26 @@ impl Ranger {
         test
     }
 
-    pub fn get_full_range_sum(&self) -> usize{
-        let mut values = Vec::new();
-        for range in &self.ranges{
-            for value in range[0]..range[1] +1{
-                if !values.contains(&value){
-                    values.push(value);
-                }
+    pub fn get_full_range_sum(&self) -> usize {
+        let mut sum = 0;
+        let mut max = 0;
+        for range in &self.ranges {
+            if max < range[0] {
+                max = range[0];
             }
+            let end = range[1];
+            let diff = if let Some(temp) = end.checked_sub(max) {
+                max = end + 1;
+                temp + 1
+            } else {
+                0
+            };
+            //println!("{:?}, {}, {}", range, max, diff);
+            sum += diff;
         }
-        values.len()
+        sum
     }
 }
-
 
 #[cfg(test)]
 mod test {
@@ -90,11 +100,10 @@ mod test {
         let (range, bank) = interpet_input(bank);
         println!("{:?}", range);
 
-        let mut fresh:usize = 0;
-        for astring in bank.split('\n'){
-            let number:usize = astring.parse().unwrap();
-            print!("{} ", number);
-            if range.value_in(number){
+        let mut fresh: usize = 0;
+        for astring in bank.split('\n') {
+            let number: usize = astring.parse().unwrap();
+            if range.value_in(number) {
                 fresh += 1;
             }
         }
