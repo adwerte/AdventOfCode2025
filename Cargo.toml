@@ -2,3 +2,8 @@
 name = "AdventOfCode2025"
 version = "0.1.0"
 edition = "2024"
+
+[dependencies]
+itertools = "0.14.0"
+ndarray = "0.16.1"
+ndarray-ndimage = "0.5.0"
