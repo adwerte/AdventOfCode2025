@@ -1,6 +1,6 @@
-use ndarray_ndimage::{convolve,BorderMode};
-use ndarray::Array2;
 use itertools::izip;
+use ndarray::Array2;
+use ndarray_ndimage::{BorderMode, convolve};
 use std::fs;
 
 pub fn main() {
@@ -8,7 +8,6 @@ pub fn main() {
     let sum = moving_paperoll_count(input.trim(), 4);
     println!("Day 4: sum = {}", sum);
 }
-
 
 fn moving_paperoll_count(bank: &str, required_weight: usize) -> usize {
     let splits = bank.split("\n");
@@ -24,27 +23,22 @@ fn moving_paperoll_count(bank: &str, required_weight: usize) -> usize {
         shape.1 = vec.len();
         vec_of_vec.extend_from_slice(&vec);
     }
-    let array =
-        Array2::from_shape_vec(shape, vec_of_vec)
-            .unwrap();
+    let array = Array2::from_shape_vec(shape, vec_of_vec).unwrap();
 
-    let kernel: Vec<usize>=vec![1, 1, 1, 1, 0, 1, 1,1,1];
-    let kernel = Array2::from_shape_vec([3,3], kernel).unwrap();
+    let kernel: Vec<usize> = vec![1, 1, 1, 1, 0, 1, 1, 1, 1];
+    let kernel = Array2::from_shape_vec([3, 3], kernel).unwrap();
 
-    let weights = convolve(&array,&kernel, BorderMode::Constant(0), 0);
-
+    let weights = convolve(&array, &kernel, BorderMode::Constant(0), 0);
 
     let removed = vec![0; array.iter().count()];
     let mut removed = Array2::from_shape_vec(shape, removed).unwrap();
-    for (value, weight, removed) in  izip!(array.iter(), weights.iter(), removed.iter_mut()){
-        if value == &1 && weight < &required_weight{
+    for (value, weight, removed) in izip!(array.iter(), weights.iter(), removed.iter_mut()) {
+        if value == &1 && weight < &required_weight {
             *removed = 1;
         }
     }
 
-
     removed.iter().sum()
-
 }
 
 fn moving_paperoll_weights(bank: &str, n: usize) -> Vec<isize> {
@@ -109,7 +103,7 @@ mod test {
     #[test]
     fn test_example() {
         let input = "..@@.@@@@.\n@@@.@.@.@@\n@@@@@.@.@@\n@.@@@@..@.\n@@.@@@@.@@\n.@@@@@@@.@\n.@.@.@.@@@\n@.@@@.@@@@\n.@@@@@@@@.\n@.@.@@@.@.";
-        let count = moving_paperoll_count(input,  4);
+        let count = moving_paperoll_count(input, 4);
         assert_eq!(count, 13)
     }
 }

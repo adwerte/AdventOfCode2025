@@ -11,7 +11,6 @@ fn main() {
     // Day 3
     crate::battery_joltage::main();
 
-
     //Day 4
     crate::paper_rolls::main();
 }
