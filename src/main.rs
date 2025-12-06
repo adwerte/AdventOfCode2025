@@ -1,7 +1,9 @@
 mod battery_joltage;
+mod cellapod_math;
 mod paper_rolls;
 mod safeopening;
 mod shopping_ids;
+
 fn main() {
     // Day 1
     crate::safeopening::main();
@@ -17,4 +19,7 @@ fn main() {
 
     //Day 5
     crate::shopping_ids::main();
+
+    //Day 6
+    crate::cellapod_math::main();
 }
