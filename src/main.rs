@@ -3,6 +3,7 @@ mod cellapod_math;
 mod paper_rolls;
 mod safeopening;
 mod shopping_ids;
+mod taychon_map;
 
 fn main() {
     // Day 1
@@ -22,4 +23,7 @@ fn main() {
 
     //Day 6
     crate::cellapod_math::main();
+
+    //Day 7
+    crate::taychon_map::main();
 }
