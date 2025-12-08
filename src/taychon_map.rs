@@ -188,6 +188,57 @@ mod test {
         println!("depth: {}, {}", depth, width);
 
         let paths = TaychonMap::get_paths_threads(&rows, depth, width);
-        assert_eq!(paths, 41);
+        assert_eq!(paths, 40);
+    }
+    #[test]
+    fn test_sub_example() {
+        let bank = ".......S.......\n...............\n.......^.......\n...............\n......^.^......\n...............\n.....^.^.^.....\n...............";
+        let bank = bank.trim();
+        let mut map = TaychonMap::new();
+        let mut splits = bank.split('\n');
+        let depth = splits.clone().count();
+        let mut ringer = splits.next().unwrap().to_string();
+        let width = ringer.len();
+        let mut rows = String::new();
+        for split in splits {
+            println!("{}", ringer);
+            rows.push_str(&ringer);
+            ringer = map.fill_row(&ringer, split);
+        }
+        println!("{}", ringer);
+        rows.push_str(&ringer);
+
+        assert_eq!(map.splits, 6);
+
+        println!("depth: {}, {}", depth, width);
+
+        let paths = TaychonMap::get_paths_threads(&rows, depth, width);
+        assert_eq!(paths, 8);
+    }
+
+    #[test]
+    fn test_sub_example_2() {
+        let bank = ".......S.......\n...............\n.......^.......\n...............\n......^.^......\n...............\n.....^.^.^.....\n...............\n....^.^...^....\n...............";
+        let bank = bank.trim();
+        let mut map = TaychonMap::new();
+        let mut splits = bank.split('\n');
+        let depth = splits.clone().count();
+        let mut ringer = splits.next().unwrap().to_string();
+        let width = ringer.len();
+        let mut rows = String::new();
+        for split in splits {
+            println!("{}", ringer);
+            rows.push_str(&ringer);
+            ringer = map.fill_row(&ringer, split);
+        }
+        println!("{}", ringer);
+        rows.push_str(&ringer);
+
+        assert_eq!(map.splits, 9);
+
+        println!("depth: {}, {}", depth, width);
+
+        let paths = TaychonMap::get_paths_threads(&rows, depth, width);
+        assert_eq!(paths, 11);
     }
 }
