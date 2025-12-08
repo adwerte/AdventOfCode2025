@@ -1,5 +1,6 @@
 mod battery_joltage;
 mod cellapod_math;
+mod electrical_fire;
 mod paper_rolls;
 mod safeopening;
 mod shopping_ids;
