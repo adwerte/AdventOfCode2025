@@ -27,4 +27,7 @@ fn main() {
 
     //Day 7
     crate::taychon_map::main();
+
+    //Day 8
+    crate::electrical_fire::main();
 }

@@ -1,5 +1,27 @@
 use ndarray::Array2;
-use std::rc::Rc;
+use std::fs;
+
+pub fn main(){
+    let bank = fs::read_to_string("./input/8_electrical_fire.txt").unwrap();
+    let boxes = JunctionBox::news(&bank);
+    let mut switch = JunctionNetwork::new(boxes.iter().collect());
+
+    for _ in 0..1000{
+        switch.iter(&boxes);
+    }
+
+    let mut networks = switch.networks;
+    networks.sort_by_key(|b| b.len());
+    networks.reverse();
+
+    let mut product:usize = 1;
+    for network in networks.iter().take(3){
+        product *= network.len();
+    }
+    println!("Day 8: Network {}", product)
+}
+
+
 
 #[derive(Debug, PartialEq)]
 struct JunctionBox {
@@ -33,20 +55,7 @@ struct JunctionNetwork<'a> {
 }
 
 impl <'a> JunctionNetwork<'a>{
-    pub fn new(boxes : Vec<JunctionBox>) -> Self{
-        todo!()
-    }
-}
-
-#[cfg(test)]
-mod test {
-
-    use super::*;
-
-    #[test]
-    fn test_example() {
-        let bank = "162,817,812\n57,618,57\n906,360,560\n592,479,940\n352,342,300\n466,668,158\n542,29,236\n431,825,988\n739,650,466\n52,470,668\n216,146,977\n819,987,18\n117,168,530\n805,96,715\n346,949,466\n970,615,88\n941,993,340\n862,61,35\n984,92,344\n425,690,689\n";
-        let boxes = JunctionBox::news(bank);
+    pub fn new(boxes : Vec<&'a JunctionBox>) -> Self{
         let mut distances = Array2::zeros((boxes.len(), boxes.len()));
         for (j, box_j) in boxes.iter().enumerate() {
             for (i, box_i) in boxes.iter().enumerate() {
@@ -61,40 +70,61 @@ mod test {
                 }
             }
         }
-        let mut networks: Vec<Vec<&JunctionBox>> = boxes.iter().map(|x| vec![x]).collect();
-        for _ in 0..10{
-            let min = distances.iter().fold(f64::INFINITY, |a, &b| a.min(b));
-            let position = distances.iter().position(|x| x == &min).unwrap();
-            let j = position / boxes.len();
-            let i = position % boxes.len();
-            distances[[i,j]] = f64::INFINITY;
-            distances[[j,i]] = f64::INFINITY;
-            let box_j = &boxes[j];
-            let box_i = &boxes[i];
-            println!("{:?} - {:?}", box_j, box_i);
-            let mut network_i = None;
-            let mut network_j = None;
-            for (network_id, network) in networks.iter().enumerate(){
-                if network.contains(&box_i) && network.contains(&box_j) {
-                    network_i = None;
-                    network_j = None;
-                } else if network.contains(&box_i){
-                    network_i = Some(network_id);
-                } else if network.contains(&box_j){
-                    network_j = Some(network_id);
-                }
-            }
+        let networks = boxes.iter().map(|x| vec![*x]).collect();
 
-            if let Some(network_i) = network_i && let Some(network_j) = network_j{
-                let network_old = networks.remove(network_j);
-                let new_index = if network_j < network_i{
-                    network_i - 1
-                } else {
-                    network_i
-                };
-                networks[new_index].extend(network_old.iter());
+        Self {networks, distances }
+    }
+
+    pub fn iter(&mut self, boxes : &[JunctionBox]){
+        let min = self.distances.iter().fold(f64::INFINITY, |a, &b| a.min(b));
+        let position = self.distances.iter().position(|x| x == &min).unwrap();
+        let j = position / boxes.len();
+        let i = position % boxes.len();
+        self.distances[[i,j]] = f64::INFINITY;
+        self.distances[[j,i]] = f64::INFINITY;
+        let box_j = &boxes[j];
+        let box_i = &boxes[i];
+        let mut network_i = None;
+        let mut network_j = None;
+        for (network_id, network) in self.networks.iter().enumerate(){
+            if network.contains(&box_i) && network.contains(&box_j) {
+                network_i = None;
+                network_j = None;
+            } else if network.contains(&box_i){
+                network_i = Some(network_id);
+            } else if network.contains(&box_j){
+                network_j = Some(network_id);
             }
         }
+
+        if let Some(network_i) = network_i && let Some(network_j) = network_j{
+            let network_old = self.networks.remove(network_j);
+            let new_index = if network_j < network_i{
+                network_i - 1
+            } else {
+                network_i
+            };
+            self.networks[new_index].extend(network_old.iter());
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn test_example() {
+        let bank = "162,817,812\n57,618,57\n906,360,560\n592,479,940\n352,342,300\n466,668,158\n542,29,236\n431,825,988\n739,650,466\n52,470,668\n216,146,977\n819,987,18\n117,168,530\n805,96,715\n346,949,466\n970,615,88\n941,993,340\n862,61,35\n984,92,344\n425,690,689\n";
+        let boxes = JunctionBox::news(bank);
+        let mut switch = JunctionNetwork::new(boxes.iter().collect());
+
+        for _ in 0..10{
+            switch.iter(&boxes);
+        }
+
+        let mut networks = switch.networks;
         networks.sort_by_key(|b| b.len());
         networks.reverse();
 
