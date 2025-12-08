@@ -1,14 +1,17 @@
 use ndarray::Array2;
-use threadpool::ThreadPool;
 use std::sync::Arc;
 use std::{fs, sync::mpsc};
+use threadpool::ThreadPool;
 
 pub fn main() {
     let bank = fs::read_to_string("./input/7_taychon_map.txt").unwrap();
     let bank = bank.trim();
     let mut splits = bank.split('\n');
     let top_row = splits.next().unwrap();
-    let mut ringer: Vec<usize> = top_row.chars().map(|x| if x == 'S' {1} else {0}).collect();
+    let mut ringer: Vec<usize> = top_row
+        .chars()
+        .map(|x| if x == 'S' { 1 } else { 0 })
+        .collect();
     let mut map = TaychonMap::new();
     for split in splits {
         //println!("{}", ringer);
@@ -17,7 +20,7 @@ pub fn main() {
 
     println!("Day 7: Splits: {}", map.splits);
 
-    let paths : usize = ringer.iter().sum();
+    let paths: usize = ringer.iter().sum();
     println!("Day 7: Paths {}", paths);
     // 3334
 }
@@ -28,9 +31,7 @@ struct TaychonMap {
 
 impl TaychonMap {
     pub fn new() -> Self {
-        TaychonMap {
-            splits: 0,
-        }
+        TaychonMap { splits: 0 }
     }
 
     pub fn fill_row(&mut self, above_row: Vec<usize>, current_row: &str) -> Vec<usize> {
@@ -155,7 +156,10 @@ mod test {
         let mut map = TaychonMap::new();
         let mut splits = bank.split('\n');
         let top_row = splits.next().unwrap();
-        let mut ringer: Vec<usize> = top_row.chars().map(|x| if x == 'S' {1} else {0}).collect();
+        let mut ringer: Vec<usize> = top_row
+            .chars()
+            .map(|x| if x == 'S' { 1 } else { 0 })
+            .collect();
         for split in splits {
             println!("{:?}", ringer);
             ringer = map.fill_row(ringer, split);
@@ -164,8 +168,7 @@ mod test {
 
         assert_eq!(map.splits, 21);
 
-
-        let paths : usize = ringer.iter().sum();
+        let paths: usize = ringer.iter().sum();
         assert_eq!(paths, 40);
     }
     #[test]
@@ -175,7 +178,10 @@ mod test {
         let mut map = TaychonMap::new();
         let mut splits = bank.split('\n');
         let top_row = splits.next().unwrap();
-        let mut ringer: Vec<usize> = top_row.chars().map(|x| if x == 'S' {1} else {0}).collect();
+        let mut ringer: Vec<usize> = top_row
+            .chars()
+            .map(|x| if x == 'S' { 1 } else { 0 })
+            .collect();
         for split in splits {
             println!("{:?}", ringer);
             ringer = map.fill_row(ringer, split);
@@ -184,7 +190,7 @@ mod test {
 
         assert_eq!(map.splits, 6);
 
-        let paths : usize = ringer.iter().sum();
+        let paths: usize = ringer.iter().sum();
         assert_eq!(paths, 8);
     }
 
@@ -195,7 +201,10 @@ mod test {
         let mut map = TaychonMap::new();
         let mut splits = bank.split('\n');
         let top_row = splits.next().unwrap();
-        let mut ringer: Vec<usize> = top_row.chars().map(|x| if x == 'S' {1} else {0}).collect();
+        let mut ringer: Vec<usize> = top_row
+            .chars()
+            .map(|x| if x == 'S' { 1 } else { 0 })
+            .collect();
         for split in splits {
             println!("{:?}", ringer);
             ringer = map.fill_row(ringer, split);
@@ -204,7 +213,7 @@ mod test {
 
         assert_eq!(map.splits, 9);
 
-        let paths : usize = ringer.iter().sum();
+        let paths: usize = ringer.iter().sum();
         assert_eq!(paths, 13);
     }
 }
