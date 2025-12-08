@@ -10,7 +10,7 @@ pub fn main(){
         switch.iter(&boxes);
     }
 
-    let mut networks = switch.networks;
+    let mut networks = switch.networks.clone();
     networks.sort_by_key(|b| b.len());
     networks.reverse();
 
@@ -18,7 +18,18 @@ pub fn main(){
     for network in networks.iter().take(3){
         product *= network.len();
     }
-    println!("Day 8: Network {}", product)
+    println!("Day 8: Network = {}", product);
+
+    while networks.len() > 1{
+        switch.iter(&boxes);
+        networks = switch.networks.clone();
+    };
+
+    let boxes= switch.latest.unwrap();
+    let total = boxes[0].coordinate[0]*boxes[1].coordinate[0];
+
+    println!("Day 8: Last connection = {}", total);
+
 }
 
 
@@ -51,7 +62,8 @@ impl JunctionBox {
 
 struct JunctionNetwork<'a> {
     networks : Vec<Vec<&'a JunctionBox>>,
-    distances : Array2<f64>
+    distances : Array2<f64>,
+    latest : Option<[&'a JunctionBox; 2]>,
 }
 
 impl <'a> JunctionNetwork<'a>{
@@ -72,10 +84,10 @@ impl <'a> JunctionNetwork<'a>{
         }
         let networks = boxes.iter().map(|x| vec![*x]).collect();
 
-        Self {networks, distances }
+        Self {networks, distances, latest:None}
     }
 
-    pub fn iter(&mut self, boxes : &[JunctionBox]){
+    pub fn iter(&mut self, boxes : &'a [JunctionBox]){
         let min = self.distances.iter().fold(f64::INFINITY, |a, &b| a.min(b));
         let position = self.distances.iter().position(|x| x == &min).unwrap();
         let j = position / boxes.len();
@@ -105,6 +117,7 @@ impl <'a> JunctionNetwork<'a>{
                 network_i
             };
             self.networks[new_index].extend(network_old.iter());
+            self.latest = Some([box_i, box_j])
         }
     }
 }
@@ -124,7 +137,7 @@ mod test {
             switch.iter(&boxes);
         }
 
-        let mut networks = switch.networks;
+        let mut networks = switch.networks.clone();
         networks.sort_by_key(|b| b.len());
         networks.reverse();
 
@@ -133,6 +146,15 @@ mod test {
             product *= network.len();
         }
 
-        assert_eq!(product, 40)
+        assert_eq!(product, 40);
+
+        while networks.len() > 1{
+            switch.iter(&boxes);
+            networks = switch.networks.clone();
+        }
+
+        let boxes= switch.latest.unwrap();
+        let total = boxes[0].coordinate[0]*boxes[1].coordinate[0];
+        assert_eq!(total, 25272)
     }
 }
