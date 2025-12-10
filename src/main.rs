@@ -6,6 +6,7 @@ mod paper_rolls;
 mod safeopening;
 mod shopping_ids;
 mod taychon_map;
+mod factory_floor;
 
 fn main() {
     // Day 1

@@ -37,13 +37,7 @@ pub fn main(){
             } else {
                 &tiles[i - 1]
             };
-            let point3 = if i >= tiles.len() - 1{
-                tiles.first().unwrap()
-            } else {
-                &tiles[i +1]
-            };
-            //println!("{:?}, {:?}, {:?}", point1, point, point3);
-            contains = abox.l_in(point1, point, point3);
+            contains = abox.line_crosses(point1, point);
             if contains {
                 break
             }
@@ -57,6 +51,7 @@ pub fn main(){
     println!("Day 9: Max Tile within Polygon size {}", area)
     // 4644339888
     // 4595816092
+    // 1571016172
 }
 
 
@@ -114,29 +109,33 @@ impl <'a> Rectangle <'a>{
 
         let x_between = point_1[0] > self.left_point[0] && point_1[0] < self.right_point[0];
         let y_between = point_1[1] > self.bot_point[1] && point_1[1] < self.top_point[1];
-        if point_1[0] != point_2[0] && x_between {
+        if point_1[0] == point_2[0] && x_between {
             let points = [point_1, point_2];
             let mut ordered_points = points.iter().sorted_by_key(|x|x[1]);
             let first = ordered_points.next().unwrap();
             let second = ordered_points.next().unwrap();
             let s_1 = first[1] <= self.bot_point[1];
-            let s_2 = second[1] <= self.top_point[1];
+            let s_2 = second[1] >= self.top_point[1];
             
+            let first = self.bot_point[1] < first[1] && first[1] < self.top_point[1];
+            let second = self.bot_point[1] < second[1] && second[1] < self.top_point[1];
 
-            (s_1 && s_2) || (s_1 && s_3 && s_4)||(s_5 && s_2 && s_6) || (s_5 && s_3 && s_6 && s_4)
-        } else if point_1[1] != point_2[1] && y_between{
+            (s_1 && s_2) || first || second 
+        } else if point_1[1] == point_2[1] && y_between{
             let points = [point_1, point_2];
-            let mut ordered_points = points.iter().sorted_by_key(|x|x[1]);
+            let mut ordered_points = points.iter().sorted_by_key(|x|x[0]);
             let first = ordered_points.next().unwrap();
             let second = ordered_points.next().unwrap();
-            let s_1 = first[0] < self.left_point[0];
-            let s_2 = second[0] < self.right_point[0];
-            let s_3 = second[0] < self.right_point[0];
-            let s_4 = second[0] > self.left_point[0];
-            let s_5 = first[0] < self.right_point[0];
-            let s_6 = first[0] > self.left_point[0];
+            let s_1 = first[0] <= self.left_point[0];
+            let s_2 = second[0] >= self.right_point[0];
+            //println!("{}-{}&&{}-{}", self.left_point[0], first[0], second[0], self.right_point[0]);
 
-            (s_1 && s_2) || (s_1 && s_3 && s_4)||(s_5 && s_2 && s_6) || (s_5 && s_3 && s_6 && s_4)
+
+            let first = self.left_point[0] < first[0] && first[0] < self.right_point[0];
+            let second = self.left_point[0] < second[0] && second[0] < self.right_point[0];
+
+            
+            (s_1 && s_2) || first || second
         } else {
             false
         }
