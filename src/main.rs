@@ -1,6 +1,7 @@
 mod battery_joltage;
 mod cellapod_math;
-mod electrical_fire;
+//mod electrical_fire;
+mod movie_teather;
 mod paper_rolls;
 mod safeopening;
 mod shopping_ids;
@@ -29,5 +30,8 @@ fn main() {
     crate::taychon_map::main();
 
     //Day 8
-    crate::electrical_fire::main();
+    //crate::electrical_fire::main();
+
+    //Day 9
+    crate::movie_teather::main();
 }
