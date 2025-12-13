@@ -1,12 +1,12 @@
 mod battery_joltage;
 mod cellapod_math;
 //mod electrical_fire;
+mod factory_floor;
 mod movie_teather;
 mod paper_rolls;
 mod safeopening;
 mod shopping_ids;
 mod taychon_map;
-mod factory_floor;
 
 fn main() {
     // Day 1
@@ -35,4 +35,7 @@ fn main() {
 
     //Day 9
     crate::movie_teather::main();
+
+    //Day 10
+    crate::factory_floor::main();
 }
