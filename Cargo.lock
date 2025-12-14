@@ -8,8 +8,7 @@ version = "0.1.0"
 dependencies = [
  "good_lp",
  "itertools 0.13.0",
- "ndarray",
- "ndarray-inverse",
+ "ndarray 0.15.6",
  "ndarray-ndimage",
  "regex",
  "threadpool",
@@ -46,25 +45,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
-name = "coin_cbc"
-version = "0.1.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d602045cd2e7ad02608a71492af94357f493a6f3c934ce854c03bf10fddc5780"
-dependencies = [
- "coin_cbc_sys",
- "lazy_static",
-]
-
-[[package]]
-name = "coin_cbc_sys"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "085619f8bdc38e24e25c6336ecc3f2e6c0543d67566dff6daef0e32f7ac20f76"
-dependencies = [
- "pkg-config",
-]
-
-[[package]]
 name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -93,7 +73,6 @@ version = "1.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "776aa1ba88ac058e78408c17f4dbff826a51ae08ed6642f71ca0edd7fe9383f3"
 dependencies = [
- "coin_cbc",
  "fnv",
  "microlp",
 ]
@@ -137,12 +116,6 @@ checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
 dependencies = [
  "either",
 ]
-
-[[package]]
-name = "lazy_static"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
@@ -197,13 +170,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "ndarray-inverse"
-version = "0.1.9"
+name = "ndarray"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03cb58dc257034643a6156a44a54f22dae1ae17862f1881e8d96004c84a8eed6"
+checksum = "0c7c9125e8f6f10c9da3aad044cc918cf8784fa34de857b1aa68038eb05a50a9"
 dependencies = [
- "ndarray",
+ "matrixmultiply",
+ "num-complex",
+ "num-integer",
  "num-traits",
+ "portable-atomic",
+ "portable-atomic-util",
+ "rawpointer",
 ]
 
 [[package]]
@@ -212,7 +190,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0e25f143f76f451ed1c8171c9fb87f0edf4942984d5782b0fb2657bff9fd2fe8"
 dependencies = [
- "ndarray",
+ "ndarray 0.15.6",
  "ndarray-stats",
  "num-traits",
 ]
@@ -225,7 +203,7 @@ checksum = "af5a8477ac96877b5bd1fd67e0c28736c12943aba24eda92b127e036b0c8f400"
 dependencies = [
  "indexmap",
  "itertools 0.10.5",
- "ndarray",
+ "ndarray 0.15.6",
  "noisy_float",
  "num-integer",
  "num-traits",
@@ -279,10 +257,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "pkg-config"
-version = "0.3.32"
+name = "portable-atomic"
+version = "1.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7edddbd0b52d732b21ad9a5fab5c704c14cd949e5e9a1ec5929a24fded1b904c"
+checksum = "f84267b20a16ea918e43c6a88433c2d54fa145c92a811b5b047ccbe153674483"
+
+[[package]]
+name = "portable-atomic-util"
+version = "0.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d8a2f0d8d040d7848a709caf78912debcc3f33ee4b3cac47d73d1e1069e83507"
+dependencies = [
+ "portable-atomic",
+]
 
 [[package]]
 name = "ppv-lite86"
@@ -388,7 +375,7 @@ version = "0.11.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6dca58a33be2188d4edc71534f8bafa826e787cc28ca1c47f31be3423f0d6e55"
 dependencies = [
- "ndarray",
+ "ndarray 0.17.1",
  "num-complex",
  "num-traits",
  "smallvec",

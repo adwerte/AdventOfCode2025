@@ -4,10 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-good_lp = { version = "1.14.2", features = ["microlp"] }
+good_lp = { version = "1.14.2", features = ["microlp"], default-features = false}
 itertools = "=0.13.0"
 ndarray = "0.15.6"
-ndarray-inverse = "0.1.9"
 ndarray-ndimage = "0.4"
 regex = "1.12.2"
 threadpool = "1.8.1"

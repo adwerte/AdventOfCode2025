@@ -1,7 +1,10 @@
+use good_lp::Expression;
+use good_lp::ProblemVariables;
+use good_lp::variable;
+use good_lp::{Solution, SolverModel, default_solver};
 use itertools::Itertools;
-use itertools::izip;
-use ndarray::{Array1, Array2, Axis, Ix1, Slice, s, concatenate};
-use ndarray_inverse::Inverse;
+use ndarray::Array;
+use ndarray::{Array1, Array2};
 use regex::Regex;
 use std::fs;
 
@@ -9,20 +12,28 @@ pub fn main() {
     let bank = fs::read_to_string("./input/10_factory_floor.txt").unwrap();
     let bank = bank.trim();
     let mut presses = 0;
+    let mut joltage = 0;
     for line in bank.split('\n') {
         let machine = Machine::new(line);
         presses += machine.optimal_pushing_iterative();
+        joltage += machine.optimal_joltage_pushing();
     }
 
-    println!("Day 10: Total Pressese {}.", presses)
+    println!("Day 10: Total Pressese {}.", presses);
     // 491
+
+    println!("Day 10: Joltage presses {}", joltage);
+    // 19669
+    // 20582
+    // 20615
+    // 20617
 }
 
 #[derive(Debug)]
 struct Machine {
     target_indicators: Vec<bool>,
     button_configurations: Vec<Vec<usize>>,
-    joltage: Vec<u8>,
+    joltage: Vec<usize>,
 }
 
 impl Machine {
@@ -40,7 +51,7 @@ impl Machine {
             if button.0.ends_with('}') {
                 joltage = button.1[0]
                     .split(',')
-                    .map(|x| x.parse::<u8>().unwrap())
+                    .map(|x| x.parse::<usize>().unwrap())
                     .collect();
             } else {
                 let connections = button.1[0]
@@ -110,78 +121,45 @@ impl Machine {
 
         min.unwrap()
     }
-    pub fn optimal_joltage_pushing(&self)->usize{
-        let c_n = vec![-1.0; self.button_configurations.len()];
-        let c_b = vec![0.0; self.joltage.len()];
-        let c = Array1::from_vec([&c_n[..], &c_b[..]].concat());
-        let b = Array1::from_vec(self.joltage.clone()).mapv(|x| x as f64);
+    pub fn optimal_joltage_pushing(&self) -> usize {
+        let c = Array1::from_vec(vec![1.0; self.button_configurations.len()]);
+        let matrix = self.get_sparse_matrix().mapv(|x| x as f64);
+        let b = Array::from_vec(self.joltage.iter().map(|x| *x as f64).collect());
 
-        let N = self.get_sparse_matrix().mapv(|x| x as f64);
-        let B = Array2::<f64>::eye(self.joltage.len());
-
-        println!("{:?} {:?}", N.shape(), B.shape());
-        let A = concatenate(Axis(0), &[N.view(), B.view()]).unwrap();
-        println!("{}", A);
-
-        let solution = Self::revised_simplex(c, A.t().to_owned(), b);
-        todo!()
+        let solution = Self::revised_simplex(c, matrix.t().to_owned(), b.clone());
+        solution.iter().sum::<f64>().round() as usize
     }
 
     fn revised_simplex(c: Array1<f64>, a: Array2<f64>, b: Array1<f64>) -> Array1<f64> {
-        let n_index = c.len() - b.len();
-        let mut n_slicer = Vec::from_iter(0..n_index);
-        let mut b_slicer = Vec::from_iter(n_index..c.len());
-        println!("{:?} {:?}", n_slicer, b_slicer);
-
-        let mut s_n = c.select(Axis(0), n_slicer.as_slice());
-        let x_n = vec![0f64; n_index];
-        let x_b = b.to_vec();
-        let mut x = Array1::from_vec([&x_n[..], &x_b[..]].concat());
-        let N = a.select(Axis(1), &n_slicer);
-        let B = a.select(Axis(1), &b_slicer);
-        let b_inv = B.inv().unwrap();
-        let c_b = c.select(Axis(0), b_slicer.as_slice());
-        let c_n = c.select(Axis(0), n_slicer.as_slice());
-        let lambda = b_inv.dot(&c_b);
-        s_n = c_n - N.t().dot(&lambda);
-        while s_n.iter().any(|x| x < &0f64) {
-            let incomming_index = s_n.iter().position_min_by(|a, b| a.total_cmp(b)).unwrap();
-            println!("{}, {}", s_n, incomming_index);
-            let d = a.slice(s![.., incomming_index]);
-            println!("{:?}", d);
-            let x_b = x.select(Axis(0), &b_slicer);
-            let coeff = &x_b / &d;
-            println!("coeff {}", coeff);
-            let outgoing_index = coeff.iter().position_min_by(|a, b| a.total_cmp(b)).unwrap();
-            for (index, temp) in izip!(&b_slicer, d) {
-                x[*index] -= temp * coeff[outgoing_index];
+        let mut variables = ProblemVariables::new();
+        let mut expression = Expression::with_capacity(c.len());
+        let mut vec_variables = Vec::new();
+        for index in 0..c.len() {
+            let variable = variables.add(variable().min(0).integer());
+            vec_variables.push(variable);
+            expression += variable * c[index];
+        }
+        let mut constraints = Vec::new();
+        for (row, b_sub) in a.rows().into_iter().zip(b.iter()) {
+            let mut row_exp = Expression::with_capacity(row.len());
+            for (coeff, var) in row.iter().zip(vec_variables.iter()) {
+                row_exp += *var * *coeff;
             }
-            x[incomming_index] = coeff[outgoing_index];
-
-            let n_removed = n_slicer.remove(incomming_index);
-            let b_removed = b_slicer.remove(outgoing_index);
-            println!("{}->{}", incomming_index, outgoing_index);
-
-            println!("x : {}", x);
-
-            n_slicer.push(b_removed);
-            b_slicer.push(n_removed);
-
-            let N = a.select(Axis(1), &n_slicer);
-            let B = a.select(Axis(1), &b_slicer);
-            let b_inv = B.inv().unwrap();
-            let c_b = c.select(Axis(0), b_slicer.as_slice());
-            let c_n = c.select(Axis(0), n_slicer.as_slice());
-            let lambda = b_inv.dot(&c_b);
-            s_n = c_n - N.t().dot(&lambda);
-
-            println!("{}", B);
-            println!("{}", N);
-            println!("{}, {}, {}", x, lambda, s_n);
+            let constraint = row_exp.eq(*b_sub);
+            constraints.push(constraint)
+        }
+        let solution = variables
+            .minimise(expression)
+            .using(default_solver)
+            .with_all(constraints)
+            .solve()
+            .unwrap();
+        let mut vec_solution = Vec::new();
+        for variable in vec_variables {
+            vec_solution.push(solution.value(variable))
         }
 
-        let result_index = Vec::from_iter(0..n_index);
-        x.select(Axis(0), &result_index)
+        Array1::from_vec(vec_solution)
     }
 }
 
@@ -197,7 +175,8 @@ mod test {
 
         assert_eq!(pushes, 2);
 
-        //let joltage_pushes = machine.optimal_joltage_pushing();
+        let joltage_pushes = machine.optimal_joltage_pushing();
+        assert_eq!(joltage_pushes, 10)
     }
 
     #[test]
@@ -207,6 +186,9 @@ mod test {
         let pushes = machine.optimal_pushing_iterative();
 
         assert_eq!(pushes, 3);
+
+        let joltage_pushes = machine.optimal_joltage_pushing();
+        assert_eq!(joltage_pushes, 12)
     }
 
     #[test]
@@ -216,20 +198,22 @@ mod test {
         let pushes = machine.optimal_pushing_iterative();
 
         assert_eq!(pushes, 2);
+
+        let joltage_pushes = machine.optimal_joltage_pushing();
+        assert_eq!(joltage_pushes, 11)
     }
 
-    #[test]
-    fn test_wiki_example() {
-        let c = Array1::<f64>::from_vec(vec![-2.0, -3.0, -4.0, 0.0, 0.0]);
-        let a = Array2::<f64>::from_shape_vec(
-            (2, 5),
-            vec![3.0, 2.0, 1.0, 1.0, 0.0, 2.0, 5.0, 3.0, 0.0, 1.0],
-        )
-        .unwrap();
-        let b = Array1::from_vec(vec![10.0, 15.0]);
-        let x = Machine::revised_simplex(c, a, b);
+    // #[test]
+    // fn test_wiki_example() {
+    //     let c = Array1::<f64>::from_vec(vec![-2.0, -3.0, -4.0]);
+    //     let a = Array2::<f64>::from_shape_vec(
+    //         (2, 3),
+    //         vec![3.0, 2.0, 1.0, 2.0, 5.0, 3.0,],
+    //     )
+    //     .unwrap();
+    //     let b = Array1::from_vec(vec![10.0, 15.0]);
+    //     let x = Machine::revised_simplex(c, a, b);
 
-        assert_eq!(x, Array1::from_vec(vec![0.0, 0.0, 5.0]));
-    }
-
+    //     assert_eq!(x, Array1::from_vec(vec![0.0, 0.0, 5.0]));
+    // }
 }
