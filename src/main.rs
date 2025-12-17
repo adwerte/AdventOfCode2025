@@ -7,6 +7,7 @@ mod paper_rolls;
 mod safeopening;
 mod shopping_ids;
 mod taychon_map;
+mod cabel_connections;
 
 fn main() {
     // Day 1
@@ -38,4 +39,7 @@ fn main() {
 
     //Day 10
     crate::factory_floor::main();
+
+    //Day 11
+    crate::cabel_connections::main();
 }
