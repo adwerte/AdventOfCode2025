@@ -16,7 +16,13 @@ pub fn main() {
             trees.push(Tree::new(line, &gifts));
         }
     }
-    println!("{:?}", trees[0])
+    let fitting_trees: Vec<&Tree> = trees.iter().filter(|x| x.get_simple_fits()).collect();
+    println!(
+        "Day 12: {} Trees where gifts might fit out of {}",
+        fitting_trees.len(),
+        trees.len(),
+    );
+    // 497
 }
 #[derive(Debug)]
 struct Gift {
@@ -40,6 +46,9 @@ impl Gift {
         Self {
             shape: Array2::from_shape_vec((depth, width), data).unwrap(),
         }
+    }
+    pub fn get_gift_area(&self) -> usize {
+        self.shape.iter().filter(|x| **x).count()
     }
 }
 
@@ -67,5 +76,14 @@ impl Tree {
             shape,
             counts: sized_gifts,
         }
+    }
+
+    pub fn get_simple_fits(&self) -> bool {
+        let tree_area = self.shape.0 * self.shape.1;
+        let mut gift_area = 0usize;
+        for (gift, count) in self.counts.iter() {
+            gift_area += gift.get_gift_area() * count;
+        }
+        gift_area < tree_area
     }
 }

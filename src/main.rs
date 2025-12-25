@@ -3,6 +3,7 @@ mod cellapod_math;
 //mod electrical_fire;
 mod cabel_connections;
 mod factory_floor;
+mod gift_packing;
 mod movie_teather;
 mod paper_rolls;
 mod safeopening;
@@ -42,4 +43,7 @@ fn main() {
 
     //Day 11
     crate::cabel_connections::main();
+
+    //Day 12
+    crate::gift_packing::main();
 }
